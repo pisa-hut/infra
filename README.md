@@ -2,12 +2,12 @@
 
 Docker Compose stack for running the full PISA manager service: PostgreSQL, PostgREST, Swagger UI, nginx reverse proxy, and the manager API.
 
-The `manager/` directory is a git submodule pointing to the [manager repo](https://github.com/PISA-Hut/manager).
+The `manager/` directory is a git submodule pointing to the [manager repo](https://github.com/pisa-hut/manager).
 
 ## Setup
 
 ```bash
-git clone --recurse-submodules <this-repo-url>
+git clone --recurse-submodules https://github.com/pisa-hut/infra.git
 # or if already cloned:
 git submodule update --init
 ```
