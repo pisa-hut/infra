@@ -22,6 +22,11 @@ services:
       POSTGRES_PASSWORD: ${DB_PASSWORD}
     volumes:
       - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${DB_USER} -d ${DB_NAME}"]
+      interval: 3s
+      timeout: 3s
+      retries: 10
 
   postgrest:
     image: postgrest/postgrest:v14.6
@@ -31,8 +36,10 @@ services:
       PGRST_DB_ANON_ROLE: web_anon
       PGRST_OPENAPI_SERVER_PROXY_URI: https://${SERVER_NAME:-localhost:8080}/postgrest
     depends_on:
-      - postgres
-      - manager
+      postgres:
+        condition: service_healthy
+      manager:
+        condition: service_started
     restart: always
 
   swagger:
@@ -48,7 +55,8 @@ services:
       DATABASE_URL: postgresql://${DB_USER}:${DB_PASSWORD}@postgres:5432/${DB_NAME}
       AUTHENTICATOR_PASSWORD: ${AUTHENTICATOR_PASSWORD}
     depends_on:
-      - postgres
+      postgres:
+        condition: service_healthy
 
 volumes:
   pgdata:
