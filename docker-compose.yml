@@ -58,9 +58,13 @@ services:
     environment:
       DATABASE_URL: postgresql://${DB_USER}:${DB_PASSWORD}@postgres:5432/${DB_NAME}
       AUTHENTICATOR_PASSWORD: ${AUTHENTICATOR_PASSWORD}
+      SCENARIO_STORAGE_DIR: /data
+    volumes:
+      - scenario_data:/data
     depends_on:
       postgres:
         condition: service_healthy
 
 volumes:
   pgdata:
+  scenario_data:
