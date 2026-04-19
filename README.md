@@ -1,8 +1,10 @@
 # Infrastructure Stack
 
-Docker Compose stack for running the full PISA manager service: PostgreSQL, PostgREST, Swagger UI, nginx reverse proxy, and the manager API.
+Docker Compose stack for the full PISA service: PostgreSQL, PostgREST, Swagger UI, nginx reverse proxy, manager API, and frontend.
 
-The `manager/` directory is a git submodule pointing to the [manager repo](https://github.com/pisa-hut/manager).
+Git submodules:
+- `manager/` → [manager repo](https://github.com/pisa-hut/manager)
+- `frontend/` → [frontend repo](https://github.com/pisa-hut/frontend)
 
 ## Setup
 
@@ -24,16 +26,21 @@ docker compose up --build
 
 All services are exposed via nginx on port **7777**:
 
-- `/manager/` → Rust manager API (port 9000)
-- `/postgrest/` → PostgREST auto-REST API (port 3000)
-- `/swagger/` → Swagger UI
+| Path | Service | Description |
+|---|---|---|
+| `/` | Frontend | React web UI |
+| `/manager/` | Manager API | Business logic (task claiming, lifecycle, upload) |
+| `/postgrest/` | PostgREST | Auto-generated CRUD API from PostgreSQL schema |
+| `/swagger/` | Swagger UI | API documentation |
 
 ## Environment Variables
 
-| Variable | Description |
-|---|---|
-| `DB_USER` | PostgreSQL user |
-| `DB_PASSWORD` | PostgreSQL password |
-| `DB_NAME` | PostgreSQL database name |
-| `AUTHENTICATOR_PASSWORD` | PostgREST role password |
-| `SERVER_NAME` | External hostname for API proxy URL |
+| Variable | Description | Default |
+|---|---|---|
+| `DB_USER` | PostgreSQL user | |
+| `DB_PASSWORD` | PostgreSQL password | |
+| `DB_NAME` | PostgreSQL database name | |
+| `AUTHENTICATOR_PASSWORD` | PostgREST role password | |
+| `SERVER_NAME` | External hostname for API proxy URL | |
+| `LISTEN_ADDR` | Bind address (`0.0.0.0` for public) | `127.0.0.1` |
+| `PISA_DATA_DIR` | Host path for scenario file storage | `/opt/pisa` |

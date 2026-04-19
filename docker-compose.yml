@@ -60,11 +60,10 @@ services:
       AUTHENTICATOR_PASSWORD: ${AUTHENTICATOR_PASSWORD}
       SCENARIO_STORAGE_DIR: /data
     volumes:
-      - scenario_data:/data
+      - ${PISA_DATA_DIR:-/opt/pisa}:/data
     depends_on:
       postgres:
         condition: service_healthy
 
 volumes:
   pgdata:
-  scenario_data:
