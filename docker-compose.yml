@@ -3,14 +3,18 @@ services:
     image: nginx:1.29.6
     container_name: nginx
     ports:
-      - "127.0.0.1:7777:80"
+      - "${LISTEN_ADDR:-127.0.0.1}:7777:80"
     volumes:
       - ./nginx/nginx.conf:/etc/nginx/conf.d/default.conf
     depends_on:
       - postgrest
       - swagger
       - manager
+      - frontend
     restart: always
+
+  frontend:
+    build: ./frontend
 
   postgres:
     image: postgres:17

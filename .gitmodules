@@ -1,3 +1,6 @@
 [submodule "manager"]
 	path = manager
 	url = git@github.com:pisa-hut/manager.git
+[submodule "frontend"]
+	path = frontend
+	url = git@github.com:pisa-hut/frontend.git
