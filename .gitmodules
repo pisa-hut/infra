@@ -4,3 +4,6 @@
 [submodule "frontend"]
 	path = frontend
 	url = https://github.com/pisa-hut/frontend.git
+[submodule "esmini-renderer"]
+	path = esmini-renderer
+	url = git@github.com:pisa-hut/esmini-renderer.git

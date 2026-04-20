@@ -65,5 +65,15 @@ services:
       postgres:
         condition: service_healthy
 
+  renderer:
+    build: ./esmini-renderer
+    environment:
+      RENDER_MODE: ${RENDER_MODE:-software}
+      SCENARIO_DIR: /data
+    volumes:
+      - ${PISA_DATA_DIR:-/opt/pisa}:/data
+      - render_cache:/tmp/render_cache
+
 volumes:
   pgdata:
+  render_cache:
