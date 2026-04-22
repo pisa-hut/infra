@@ -69,10 +69,11 @@ services:
     build: ./esmini-renderer
     environment:
       RENDER_MODE: ${RENDER_MODE:-software}
-      SCENARIO_DIR: /data
+      MANAGER_URL: http://manager:9000
     volumes:
-      - ${PISA_DATA_DIR:-/opt/pisa}:/data
       - render_cache:/tmp/render_cache
+    depends_on:
+      - manager
 
 volumes:
   pgdata:
