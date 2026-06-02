@@ -87,10 +87,7 @@ SEED_SIMULATORS = [
 SEED_MAPS = [{"name": "tyms"}, {"name": "frankenburg"}, {"name": "Town10HD_Opt"}]
 
 SEED_SAMPLERS = [
-    {
-        "name": "grid",
-        "module_path": "simcore.sampler.grid_search_sampler:GridSearchSampler",
-    },
+    {"name": "grid"},
 ]
 
 # av/sim configs live at config/{av|sim}/<name>.yaml
