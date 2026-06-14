@@ -59,6 +59,16 @@ SEED_AVS = [
         "ros_runtime": False,
         "carla_runtime": True,
     },
+    {
+        "name": "pcla",
+        "image_path": {
+            "apptainer": "/opt/pisa/sif/pcla.sif",
+            "docker": "tonychi/pcla-wrapper:latest",
+        },
+        "nv_runtime": True,
+        "ros_runtime": False,
+        "carla_runtime": True,
+    },
 ]
 
 SEED_SIMULATORS = [
