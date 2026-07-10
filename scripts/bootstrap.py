@@ -65,6 +65,7 @@ SEED_AVS = [
             "apptainer": "/opt/pisa/sif/pcla.sif",
             "docker": "tonychi/pcla-wrapper:latest",
         },
+        "weight_path": "weights/plant_pretrained",
         "nv_runtime": True,
         "ros_runtime": False,
         "carla_runtime": True,
@@ -143,6 +144,24 @@ def http_post_json(url: str, payload: dict[str, Any]) -> tuple[int, Any]:
     return status, parsed
 
 
+def http_patch_json(url: str, payload: dict[str, Any]) -> tuple[int, Any]:
+    status, body = _request(
+        "PATCH",
+        url,
+        body=json.dumps(payload).encode(),
+        headers={
+            "Content-Type": "application/json",
+            "Accept": "application/json",
+        },
+    )
+    parsed: Any
+    try:
+        parsed = json.loads(body) if body else None
+    except json.JSONDecodeError:
+        parsed = body
+    return status, parsed
+
+
 def http_put_bytes(url: str, data: bytes) -> int:
     status, _ = _request(
         "PUT",
@@ -170,6 +189,13 @@ def seed_rows(pg_url: str) -> None:
         existing = _existing_names(pg_url, table)
         for item in items:
             if item["name"] in existing:
+                if table == "av" and item.get("weight_path"):
+                    url = f"{pg_url}/{table}?name=eq.{urllib.parse.quote(item['name'])}"
+                    status, body = http_patch_json(url, {"weight_path": item["weight_path"]})
+                    if 200 <= status < 300:
+                        print(f"  [sync ] {table}/{item['name']} weight_path")
+                    else:
+                        print(f"  [ERROR] {table}/{item['name']} weight_path -> {status} {body!r}")
                 print(f"  [skip ] {table}/{item['name']} (exists)")
                 continue
             status, body = http_post_json(f"{pg_url}/{table}", item)
