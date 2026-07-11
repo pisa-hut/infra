@@ -6,14 +6,12 @@ don't have to click through the Resources page after a DB wipe.
 
 Usage:
     python3 infra/scripts/bootstrap.py [--pisa-data-dir PATH]
-                                       [--pisa-sif-dir PATH]
                                        [--manager-url URL]
                                        [--postgrest-url URL]
                                        [--only rows|configs|maps|all]
 
 Defaults:
     --pisa-data-dir  $PISA_DATA_DIR or /PISA_DATA_DIR
-    --pisa-sif-dir   $PISA_SIF_DIR or <pisa-data-dir>/sif
     --manager-url    $MANAGER_URL   or http://localhost:7777/manager
     --postgrest-url  $POSTGREST_URL or http://localhost:7777/postgrest
 
@@ -44,8 +42,8 @@ SEED_AV_TEMPLATES = [
     {
         "name": "autoware",
         "image_path": {
-            "apptainer": "{sif_dir}/autoware.sif",
-            "docker": "tonychi/autoware-wrapper:latest",
+            "apptainer": "docker://docker.io/tonychi/autoware-wrapper:latest",
+            "docker": "docker.io/tonychi/autoware-wrapper:latest",
         },
         "nv_runtime": False,
         "ros_runtime": True,
@@ -54,8 +52,8 @@ SEED_AV_TEMPLATES = [
     {
         "name": "carla-agent",
         "image_path": {
-            "apptainer": "{sif_dir}/carla-agent.sif",
-            "docker": "tonychi/carla-agent-wrapper:latest",
+            "apptainer": "docker://docker.io/tonychi/carla-agent-wrapper:latest",
+            "docker": "docker.io/tonychi/carla-agent-wrapper:latest",
         },
         "nv_runtime": True,
         "ros_runtime": False,
@@ -64,8 +62,8 @@ SEED_AV_TEMPLATES = [
     {
         "name": "pcla",
         "image_path": {
-            "apptainer": "{sif_dir}/pcla.sif",
-            "docker": "tonychi/pcla-wrapper:latest",
+            "apptainer": "docker://docker.io/tonychi/pcla-wrapper:latest",
+            "docker": "docker.io/tonychi/pcla-wrapper:latest",
         },
         "weight_path": "weights/plant_pretrained",
         "nv_runtime": True,
@@ -78,8 +76,8 @@ SEED_SIMULATOR_TEMPLATES = [
     {
         "name": "esmini",
         "image_path": {
-            "apptainer": "{sif_dir}/esmini.sif",
-            "docker": "tonychi/esmini-wrapper:latest",
+            "apptainer": "docker://docker.io/tonychi/esmini-wrapper:latest",
+            "docker": "docker.io/tonychi/esmini-wrapper:latest",
         },
         "nv_runtime": False,
         "ros_runtime": False,
@@ -88,8 +86,8 @@ SEED_SIMULATOR_TEMPLATES = [
     {
         "name": "carla",
         "image_path": {
-            "apptainer": "{sif_dir}/carla.sif",
-            "docker": "tonychi/carla-wrapper:latest",
+            "apptainer": "docker://docker.io/tonychi/carla-wrapper:latest",
+            "docker": "docker.io/tonychi/carla-wrapper:latest",
         },
         "nv_runtime": True,
         "ros_runtime": False,
@@ -186,23 +184,9 @@ def _id_by_name(pg_url: str, table: str, name: str) -> int | None:
     return rows[0]["id"] if rows else None
 
 
-def _format_image_paths(items: list[dict[str, Any]], sif_dir: Path) -> list[dict[str, Any]]:
-    formatted: list[dict[str, Any]] = []
-    for item in items:
-        row = dict(item)
-        image_path = row.get("image_path")
-        if isinstance(image_path, dict):
-            row["image_path"] = {
-                key: value.format(sif_dir=sif_dir.as_posix()) if isinstance(value, str) else value
-                for key, value in image_path.items()
-            }
-        formatted.append(row)
-    return formatted
-
-
-def seed_rows(pg_url: str, sif_dir: Path) -> None:
-    avs = _format_image_paths(SEED_AV_TEMPLATES, sif_dir)
-    simulators = _format_image_paths(SEED_SIMULATOR_TEMPLATES, sif_dir)
+def seed_rows(pg_url: str) -> None:
+    avs = SEED_AV_TEMPLATES
+    simulators = SEED_SIMULATOR_TEMPLATES
     for table, items in (("av", avs), ("simulator", simulators), ("map", SEED_MAPS), ("sampler", SEED_SAMPLERS)):
         existing = _existing_names(pg_url, table)
         for item in items:
@@ -273,19 +257,17 @@ def upload_map_files(pg_url: str, man_url: str, data_dir: Path) -> None:
 def main() -> int:
     p = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     p.add_argument("--pisa-data-dir", default=os.getenv("PISA_DATA_DIR", "/PISA_DATA_DIR"))
-    p.add_argument("--pisa-sif-dir", default=os.getenv("PISA_SIF_DIR"))
     p.add_argument("--manager-url", default=os.getenv("MANAGER_URL", "http://localhost:7777/manager"))
     p.add_argument("--postgrest-url", default=os.getenv("POSTGREST_URL", "http://localhost:7777/postgrest"))
     p.add_argument("--only", choices=["rows", "configs", "maps", "all"], default="all")
     args = p.parse_args()
 
     data_dir = Path(args.pisa_data_dir).resolve()
-    sif_dir = Path(args.pisa_sif_dir).resolve() if args.pisa_sif_dir else data_dir / "sif"
-    print(f"manager={args.manager_url} postgrest={args.postgrest_url} data_dir={data_dir} sif_dir={sif_dir}")
+    print(f"manager={args.manager_url} postgrest={args.postgrest_url} data_dir={data_dir}")
 
     if args.only in ("rows", "all"):
         print("[1/3] Seeding rows")
-        seed_rows(args.postgrest_url, sif_dir)
+        seed_rows(args.postgrest_url)
     if args.only in ("configs", "all"):
         print("[2/3] Uploading configs")
         upload_configs(args.postgrest_url, args.manager_url, data_dir)
